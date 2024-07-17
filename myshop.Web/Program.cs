@@ -1,9 +1,9 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using myshop.DataAccess;
 using myshop.DataAccess.Implementation;
 using myshop.Entities.Repositories;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using myshop.Utilities;
 using Stripe;
 
@@ -14,14 +14,15 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("DefaultConnection")
-    )) ;
+    ));
 builder.Services.Configure<StripeData>(builder.Configuration.GetSection("stripe"));
 
-builder.Services.AddIdentity<IdentityUser,IdentityRole>(
-    options=>options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromDays(4)
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(
+    options => options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromDays(4)
     ).AddDefaultTokenProviders().AddDefaultUI()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 builder.Services.AddSingleton<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -51,6 +52,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseSession();
+SeedDatabase();
 
 app.MapRazorPages();
 app.MapControllerRoute(
@@ -62,3 +64,11 @@ app.MapControllerRoute(
     pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+void SeedDatabase()
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        dbInitializer.Initialize();
+    }
+}

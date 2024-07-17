@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using myshop.DataAccess;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using myshop.Entities.Models;
 using myshop.Entities.Repositories;
 
@@ -13,7 +13,7 @@ namespace myshop.Web.Areas.Admin.Controllers
         {
             _unitOfWork = unitOfWork;
         }
-
+        [Authorize(Roles = "Admin")]
         public IActionResult Index()
         {
             var categories = _unitOfWork.Category.GetAll();
@@ -21,12 +21,14 @@ namespace myshop.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
+
         public IActionResult Create()
         {
 
             return View();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Category category)
@@ -42,7 +44,7 @@ namespace myshop.Web.Areas.Admin.Controllers
             }
             return View(category);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Edit(int? id)
         {
@@ -56,7 +58,7 @@ namespace myshop.Web.Areas.Admin.Controllers
 
             return View(categoryIndb);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Category category)
@@ -73,7 +75,7 @@ namespace myshop.Web.Areas.Admin.Controllers
             }
             return View(category);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Delete(int? id)
         {
@@ -85,7 +87,7 @@ namespace myshop.Web.Areas.Admin.Controllers
 
             return View(categoryIndb);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public IActionResult DeleteCategory(int? id)
         {

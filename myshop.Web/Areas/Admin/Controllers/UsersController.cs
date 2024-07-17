@@ -6,9 +6,9 @@ using System.Security.Claims;
 
 namespace myshop.Web.Areas.Admin.Controllers
 {
-    
+
     [Area("Admin")]
-    [Authorize(Roles =SD.AdminRole)]
+    [Authorize(Roles = SD.AdminRole)]
     public class UsersController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -24,9 +24,9 @@ namespace myshop.Web.Areas.Admin.Controllers
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
             string userid = claim.Value;
 
-            return View(_context.ApplicationUsers.Where(x=>x.Id != userid).ToList());
+            return View(_context.ApplicationUsers.Where(x => x.Id != userid).ToList());
         }
-
+        [Authorize(Roles = "Admin")]
         public IActionResult LockUnlock(string? id)
         {
             var user = _context.ApplicationUsers.FirstOrDefault(x => x.Id == id);
@@ -44,7 +44,7 @@ namespace myshop.Web.Areas.Admin.Controllers
             }
 
             _context.SaveChanges();
-            return RedirectToAction("Index", "Users", new {area = "Admin"});
+            return RedirectToAction("Index", "Users", new { area = "Admin" });
         }
     }
 }

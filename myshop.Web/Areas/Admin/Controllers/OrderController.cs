@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using myshop.Entities.Models;
 using myshop.Entities.Repositories;
 using myshop.Entities.ViewModels;
@@ -9,6 +10,7 @@ namespace myshop.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
     //[Authorize(Roles =SD.AdminRole)]
+    [Authorize]
     public class OrderController : Controller
     {
         private readonly IUnitOfWork _unitofwork;
@@ -43,7 +45,7 @@ namespace myshop.Web.Areas.Admin.Controllers
 
             return View(orderVM);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult UpdateOrderDetails()
@@ -70,7 +72,7 @@ namespace myshop.Web.Areas.Admin.Controllers
             return RedirectToAction("Details", "Order", new { orderid = orderfromdb.Id });
         }
 
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult StartProccess()
@@ -81,7 +83,7 @@ namespace myshop.Web.Areas.Admin.Controllers
             TempData["Update"] = "Order Status has Updated Successfully";
             return RedirectToAction("Details", "Order", new { orderid = OrderVM.OrderHeader.Id });
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult StartShip()
@@ -99,7 +101,7 @@ namespace myshop.Web.Areas.Admin.Controllers
             return RedirectToAction("Details", "Order", new { orderid = OrderVM.OrderHeader.Id });
         }
 
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CancelOrder()

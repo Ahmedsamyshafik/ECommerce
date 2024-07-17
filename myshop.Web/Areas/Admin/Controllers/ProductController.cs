@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using myshop.DataAccess;
 using myshop.Entities.Models;
 using myshop.Entities.Repositories;
 using myshop.Entities.ViewModels;
@@ -12,12 +12,12 @@ namespace myshop.Web.Areas.Admin.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public ProductController(IUnitOfWork unitOfWork,IWebHostEnvironment webHostEnvironment)
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
         }
-
+        [Authorize(Roles = "Admin")]
         public IActionResult Index()
         {
             return View();
@@ -26,10 +26,10 @@ namespace myshop.Web.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult GetData()
         {
-            var categories = _unitOfWork.Product.GetAll(Includeword:"Category");
-            return Json(new {data = categories});
+            var categories = _unitOfWork.Product.GetAll(Includeword: "Category");
+            return Json(new { data = categories });
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Create()
         {
@@ -44,10 +44,10 @@ namespace myshop.Web.Areas.Admin.Controllers
             };
             return View(productVM);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(ProductVM productVM,IFormFile file)
+        public IActionResult Create(ProductVM productVM, IFormFile file)
         {
             if (ModelState.IsValid)
             {
@@ -58,7 +58,7 @@ namespace myshop.Web.Areas.Admin.Controllers
                     var Upload = Path.Combine(RootPath, @"Images\Products");
                     var ext = Path.GetExtension(file.FileName);
 
-                    using (var filestream = new FileStream(Path.Combine(Upload,filename+ext),FileMode.Create))
+                    using (var filestream = new FileStream(Path.Combine(Upload, filename + ext), FileMode.Create))
                     {
                         file.CopyTo(filestream);
                     }
@@ -106,7 +106,7 @@ namespace myshop.Web.Areas.Admin.Controllers
                     var Upload = Path.Combine(RootPath, @"Images\Products");
                     var ext = Path.GetExtension(file.FileName);
 
-                    if (productVM.Product.Img !=null)
+                    if (productVM.Product.Img != null)
                     {
                         var oldimg = Path.Combine(RootPath, productVM.Product.Img.TrimStart('\\'));
                         if (System.IO.File.Exists(oldimg))
@@ -128,14 +128,14 @@ namespace myshop.Web.Areas.Admin.Controllers
             }
             return View(productVM.Product);
         }
-      
+
         [HttpDelete]
         public IActionResult Delete(int? id)
         {
             var productIndb = _unitOfWork.Product.GetFirstorDefault(x => x.Id == id);
             if (productIndb == null)
             {
-               return Json(new { success = false, message = "Error while Deleting" });
+                return Json(new { success = false, message = "Error while Deleting" });
             }
             _unitOfWork.Product.Remove(productIndb);
             var oldimg = Path.Combine(_webHostEnvironment.WebRootPath, productIndb.Img.TrimStart('\\'));
